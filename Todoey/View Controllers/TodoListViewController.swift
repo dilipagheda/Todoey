@@ -11,7 +11,7 @@ import UIKit
 class TodoListViewController: UITableViewController {
 
     var itemsArray:[Item] = []
-    var userDefault = UserDefaults.standard
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
        var textField = UITextField()
@@ -21,7 +21,9 @@ class TodoListViewController: UITableViewController {
             let newItem = Item()
             newItem.title = textField.text!
             self.itemsArray.append(newItem)
-            self.userDefault.setValue(self.itemsArray, forKey: "ToDoItems")
+            
+            self.SaveData()
+            
             self.tableView.reloadData()
         }
         
@@ -35,17 +37,38 @@ class TodoListViewController: UITableViewController {
     
     }
     
+    func SaveData(){
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(self.itemsArray)
+            try data.write(to: self.dataFilePath!)
+        }catch{
+            print("Error encoding data")
+        }
+    }
+    
+    func RetrieveData(){
+        if let data = try? Data(contentsOf: dataFilePath!){
+            let decoder = PropertyListDecoder()
+            do {
+                itemsArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("Error decoding")
+            }
+        }
+        
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
+      
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
-        if let items = userDefault.array(forKey: "ToDoItems") as? [Item] {
-            itemsArray = items
-        }
+        RetrieveData()
     }
 
     override func didReceiveMemoryWarning() {
@@ -76,10 +99,10 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         tableView.deselectRow(at: indexPath, animated: true)
-        
+        itemsArray[indexPath.row].done = !itemsArray[indexPath.row].done
         let item = itemsArray[indexPath.row]
         tableView.cellForRow(at: indexPath)?.accessoryType = item.done == true ? .checkmark : .none
-       
+        SaveData()
         
     }
  
