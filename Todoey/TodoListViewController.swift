@@ -10,7 +10,8 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    var itemsArray = ["Find mike", "Buy eggs", "Do weight-training", "Learn iOS"]
+    var itemsArray:[String] = []
+    var userDefault = UserDefaults.standard
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
        var textField = UITextField()
@@ -18,6 +19,7 @@ class TodoListViewController: UITableViewController {
        let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
         let alertAction = UIAlertAction(title: "Add Item", style: .default) { (action) in
             self.itemsArray.append(textField.text!)
+            self.userDefault.setValue(self.itemsArray, forKey: "ToDoItems")
             self.tableView.reloadData()
         }
         
@@ -39,6 +41,9 @@ class TodoListViewController: UITableViewController {
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        if let items = userDefault.array(forKey: "ToDoItems") as? [String] {
+            itemsArray = items
+        }
     }
 
     override func didReceiveMemoryWarning() {
