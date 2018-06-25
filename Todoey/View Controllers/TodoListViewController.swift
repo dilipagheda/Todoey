@@ -10,7 +10,7 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    var itemsArray:[String] = []
+    var itemsArray:[Item] = []
     var userDefault = UserDefaults.standard
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -18,7 +18,9 @@ class TodoListViewController: UITableViewController {
         
        let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
         let alertAction = UIAlertAction(title: "Add Item", style: .default) { (action) in
-            self.itemsArray.append(textField.text!)
+            let newItem = Item()
+            newItem.title = textField.text!
+            self.itemsArray.append(newItem)
             self.userDefault.setValue(self.itemsArray, forKey: "ToDoItems")
             self.tableView.reloadData()
         }
@@ -41,7 +43,7 @@ class TodoListViewController: UITableViewController {
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
-        if let items = userDefault.array(forKey: "ToDoItems") as? [String] {
+        if let items = userDefault.array(forKey: "ToDoItems") as? [Item] {
             itemsArray = items
         }
     }
@@ -64,7 +66,9 @@ class TodoListViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "todoItem", for: indexPath)
 
         // Configure the cell...
-        cell.textLabel?.text = itemsArray[indexPath.row]
+        let item = itemsArray[indexPath.row]
+        cell.textLabel?.text = item.title
+        cell.accessoryType = item.done == true ? .checkmark : .none
 
         return cell
     }
@@ -73,11 +77,9 @@ class TodoListViewController: UITableViewController {
         
         tableView.deselectRow(at: indexPath, animated: true)
         
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        }else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+        let item = itemsArray[indexPath.row]
+        tableView.cellForRow(at: indexPath)?.accessoryType = item.done == true ? .checkmark : .none
+       
         
     }
  
